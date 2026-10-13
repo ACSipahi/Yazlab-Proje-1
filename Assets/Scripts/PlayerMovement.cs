@@ -107,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
         {
             jumped = false;
         }
-        if (runInput.IsPressed())
+        if (runInput.IsPressed() && isCrouching == false)
         {
             currentSpeed = runSpeed;
         }
