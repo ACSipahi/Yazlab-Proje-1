@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Unity.PlasticSCM.Editor.WebApi;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
@@ -15,6 +16,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float lookLimitAngle = 90f;
     [SerializeField] private float crouchSpeed = 3;
 
+
+    private float normalHitboxCenter;
+    private float normalHitboxSize;
+    private float distanceBetweenNormalSize;
+    
+    private Vector3 normalCameraPosition;
+    private Vector3 crouchedCameraPosition;
+    
     private Camera mainCam;
     private InputAction crouchInput;
 
@@ -33,10 +42,12 @@ public class PlayerMovement : MonoBehaviour
     Vector3 oldCamPosition;
     private bool isCrouching = false;
     private void Start()
-    {
-
+    { distanceBetweenNormalSize = GetComponentInChildren<BoxCollider2D>().transform.position.y - GetComponentInChildren<SphereCollider>().transform.position.y; ;
+         
         mainCam = GetComponentInChildren<Camera>();
         characterController = GetComponent<CharacterController>();
+        normalHitboxSize = characterController.height;
+        normalHitboxCenter = characterController.center.y;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
         currentSpeed = walkSpeed;
@@ -51,6 +62,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void MovementHandler(Vector2 walkInput)
     {
+        crouchedCameraPosition = GetComponentInChildren<BoxCollider2D>().transform.position;
+        normalCameraPosition = GetComponentInChildren<SphereCollider>().transform.position;
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
 
@@ -77,7 +90,7 @@ public class PlayerMovement : MonoBehaviour
     }
     private void Update()
     {
-
+        Debug.Log("normalHitboxSize");
 
         isCrouching = false;
         currentSpeed = walkSpeed;
@@ -120,9 +133,15 @@ public class PlayerMovement : MonoBehaviour
 
         if (isCrouching)
         {
-            
-            
+            mainCam.transform.position = crouchedCameraPosition;
+            characterController.center = GetComponent<CapsuleCollider>().center;
+            characterController.height = normalHitboxSize + distanceBetweenNormalSize;
         }
-       
+       else
+        {
+            mainCam.transform.position = normalCameraPosition;
+            characterController.center = new Vector3(0, normalHitboxCenter, 0);
+            characterController.height = normalHitboxSize;
+        }
     }
 }
