@@ -4,12 +4,12 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class CompanionFollow : MonoBehaviour
 {
-    [SerializeField] private Transform player;
-    [SerializeField] private float followDistance = 2.5f;
-    [SerializeField] private float catchUpDistance = 8f;
-    [SerializeField] private float walkSpeed = 3.5f;
-    [SerializeField] private float runSpeed = 6f;
-    [SerializeField] private Animator animator;          
+    [SerializeField] public Transform player;
+    [SerializeField] public float followDistance = 2.5f;
+    [SerializeField] public float catchUpDistance = 8f;
+    [SerializeField] public float walkSpeed = 3.5f;
+    [SerializeField] public float runSpeed = 6f;
+    [SerializeField] public Animator animator;          
 
     NavMeshAgent agent;
 
