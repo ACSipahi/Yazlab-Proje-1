@@ -38,7 +38,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool jumped = false;
     private InputAction runInput;
-
+    
     Vector3 oldCamPosition;
     private bool isCrouching = false;
     private void Start()
@@ -90,7 +90,7 @@ public class PlayerMovement : MonoBehaviour
     }
     private void Update()
     {
-        Debug.Log("normalHitboxSize");
+        
 
         isCrouching = false;
         currentSpeed = walkSpeed;
