@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using Unity.PlasticSCM.Editor.WebApi;
 using UnityEngine;
@@ -41,6 +42,8 @@ public class PlayerMovement : MonoBehaviour
     
     Vector3 oldCamPosition;
     private bool isCrouching = false;
+    [SerializeField] private LayerMask layerMask;
+    private bool isThereGroundAbove = false;
     private void Start()
     { distanceBetweenNormalSize = GetComponentInChildren<BoxCollider2D>().transform.position.y - GetComponentInChildren<SphereCollider>().transform.position.y; ;
          
@@ -90,9 +93,13 @@ public class PlayerMovement : MonoBehaviour
     }
     private void Update()
     {
-        
 
-        isCrouching = false;
+        if (isThereGroundAbove == false) 
+        { 
+            isCrouching = false; 
+        }
+        
+        
         currentSpeed = walkSpeed;
         Vector2 walkInput = moveInput.ReadValue<Vector2>();
         Vector2 mouseDelta = new Vector2(Mouse.current.delta.x.ReadValue(), Mouse.current.delta.y.ReadValue());
@@ -133,6 +140,16 @@ public class PlayerMovement : MonoBehaviour
 
         if (isCrouching)
         {
+            if(Physics.Raycast(transform.position, transform.up, distanceBetweenNormalSize + 1.42f, layerMask, QueryTriggerInteraction.Ignore)) 
+            {
+                isThereGroundAbove = true;
+            }
+            else
+            {
+                isThereGroundAbove = false;
+            }
+            
+            
             mainCam.transform.position = crouchedCameraPosition;
             characterController.center = GetComponent<CapsuleCollider>().center;
             characterController.height = normalHitboxSize + distanceBetweenNormalSize;
