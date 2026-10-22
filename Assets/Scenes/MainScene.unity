@@ -119,6 +119,89 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &24063253
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 24063254}
+  - component: {fileID: 24063255}
+  - component: {fileID: 24063256}
+  - component: {fileID: 24063257}
+  m_Layer: 0
+  m_Name: DoorTrigger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &24063254
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 24063253}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 214263686}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &24063255
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 24063253}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.6581354, y: 1, z: 24.408812}
+  m_Center: {x: -0.027042676, y: 0, z: -1.2312393}
+--- !u!114 &24063256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 24063253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1af2214b3422fea4da13aa5b8129d52c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SearchTrigger
+  companion: {fileID: 566551806}
+  searchArea: {fileID: 0}
+--- !u!114 &24063257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 24063253}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8eebd5ebf55a324486b8e12bff2e2d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DoorZone
+  companion: {fileID: 566551806}
+  searchRadius: 30
 --- !u!1 &25098688
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,8 +342,8 @@ Transform:
   m_GameObject: {fileID: 122131771}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 49.48, y: -2, z: 0.07}
-  m_LocalScale: {x: 30, y: 0.5, z: 10}
+  m_LocalPosition: {x: 59.92, y: -2, z: 0.07}
+  m_LocalScale: {x: 50, y: 0.5, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 346688743}
@@ -354,8 +437,8 @@ GameObject:
   - component: {fileID: 214263686}
   - component: {fileID: 214263685}
   - component: {fileID: 214263684}
-  - component: {fileID: 214263683}
   - component: {fileID: 214263682}
+  - component: {fileID: 214263687}
   m_Layer: 0
   m_Name: door
   m_TagString: Untagged
@@ -377,27 +460,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Door
   openHeight: 3
   speed: 2
---- !u!65 &214263683
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 214263681}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &214263684
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -467,9 +529,31 @@ Transform:
   m_LocalPosition: {x: 50, y: 0.14, z: 0.27}
   m_LocalScale: {x: 5, y: 4, z: 0.5}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 24063254}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!65 &214263687
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 214263681}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000002, y: 1, z: 1.0000002}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &221576864
 GameObject:
   m_ObjectHideFlags: 0
@@ -715,7 +799,7 @@ Transform:
   m_GameObject: {fileID: 288453130}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.09, y: 0, z: 0}
+  m_LocalPosition: {x: 38.06, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1207,7 +1291,7 @@ Transform:
   m_GameObject: {fileID: 509640037}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 50.513, y: -0.2, z: 4.02}
+  m_LocalPosition: {x: 66.2, y: -0.2, z: -3.66}
   m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1257,7 +1341,6 @@ GameObject:
   - component: {fileID: 566551807}
   - component: {fileID: 566551806}
   - component: {fileID: 566551812}
-  - component: {fileID: 566551813}
   m_Layer: 11
   m_Name: Companion
   m_TagString: Untagged
@@ -1277,19 +1360,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdb775b9d535da8498a02c4d918e4d4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CompanionFollow
-  layerMask:
-    serializedVersion: 2
-    m_Bits: 1073747251
-  currentHitObjects: []
   player: {fileID: 1608161311}
   followDistance: 5
   catchUpDistance: 8
   walkSpeed: 10
   runSpeed: 6
   animator: {fileID: 0}
-  progressionObject: {fileID: 1121755698}
-  maxDistance: 10
-  radiusOfSearch: 7
+  goTimeout: 15
+  searchRadius: 300
+  useTestKey: 0
 --- !u!195 &566551807
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1401,7 +1480,7 @@ Transform:
   m_GameObject: {fileID: 566551805}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.09, y: -0.47, z: -2.67}
+  m_LocalPosition: {x: 42.39, y: -0.47, z: -2.67}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1426,24 +1505,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &566551813
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 566551805}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a63ede05f065d347b5ac200ffcd7262, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CompanionPress
-  playerDetectRadius: 3
-  buttonLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  follow: {fileID: 566551806}
-  animator: {fileID: 0}
 --- !u!1 &611386730 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1689892608009186, guid: 6fc2010b5899cfd488a0ddf205679e2b, type: 3}
@@ -2797,7 +2858,7 @@ Transform:
   m_GameObject: {fileID: 1448611326}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 59.712, y: -1.25, z: 3.15}
+  m_LocalPosition: {x: 61.56, y: -1.25, z: 3.09}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3303,7 +3364,7 @@ MonoBehaviour:
   m_Center: {x: 0, y: 2, z: 0}
   m_LayerMask:
     serializedVersion: 2
-    m_Bits: 1073742135
+    m_Bits: 4294967295
   m_UseGeometry: 1
   m_DefaultArea: 0
   m_GenerateLinks: 0

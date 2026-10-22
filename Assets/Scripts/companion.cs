@@ -1,125 +1,137 @@
-using System;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
-using Unity.VisualScripting;
-using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class CompanionFollow : MonoBehaviour
 {
-    private Vector3 currentGoal;
-    [SerializeField]private LayerMask layerMask;
-    [SerializeField]private List<GameObject> currentHitObjects = new List<GameObject>();
+    enum State { Follow, Go }
+
+    [Header("Takip")]
     [SerializeField] public Transform player;
     [SerializeField] public float followDistance = 2.5f;
     [SerializeField] public float catchUpDistance = 8f;
     [SerializeField] public float walkSpeed = 3.5f;
     [SerializeField] public float runSpeed = 6f;
     [SerializeField] public Animator animator;
-    private int RaycastCoolDown;
+
+    [Header("Buton arama")]
+    [SerializeField] private float goTimeout = 15f;
+    [SerializeField] private float searchRadius = 30f;
+    [SerializeField] private bool useTestKey = true;   // F tusu ile test
+
     NavMeshAgent agent;
-    private bool isProgressing = false;
-    private Vector3 progressPosition;
-    [SerializeField] private GameObject progressionObject;
-    private float currentHitDistance;
-    private GameObject foundObject;
-    [SerializeField] private float maxDistance=5;
-    [SerializeField] private float radiusOfSearch = 5;
-    private int searchTimes = 0;
-    private bool searchStart = false;
+    State state = State.Follow;
+    CompanionButton target;
+    Vector3 goal;
+    float goTimer;
+    readonly HashSet<CompanionButton> pressed = new HashSet<CompanionButton>();
+
     void Awake()
     {
-        currentHitDistance = maxDistance;
         agent = GetComponent<NavMeshAgent>();
         agent.stoppingDistance = followDistance;
     }
 
-    public void Searching(bool isProgressing,List<GameObject> list) 
-    { if (isProgressing == true) 
-        { for (int j = 10; j == 0; j--)
-            {
-                transform.Rotate(0, 0.1f, 0, Space.Self);
-                if (list.Contains(progressionObject))
-                { searchTimes = 0; break; }
-                
-            }
-            if (list.Contains(progressionObject) == false &&  searchTimes == 10) 
-            { 
-              isProgressing = false;
-                searchTimes = 0;            
-            }
-        }
-    
-    
-    }
-    private void FixedUpdate()
+    // DoorZone buradan cagirir: en yakin basilmamis butonu bulur ve gider
+    public void FindAndPress(float radius)
     {
-        Searching(isProgressing, currentHitObjects);
-        Debug.Log(progressionObject);
-        currentHitDistance = maxDistance;
-        currentHitObjects.Clear();
-        RaycastHit[] hits=Physics.SphereCastAll(transform.position+new Vector3(0,1,0), radiusOfSearch, transform.forward, maxDistance, layerMask);
-        foreach (RaycastHit hit in hits)
+        if (state != State.Follow) return;
+
+        CompanionButton best = null;
+        float bestDist = radius;
+
+        foreach (var b in FindObjectsByType<CompanionButton>(FindObjectsSortMode.None))
         {
-            
-            currentHitObjects.Add(hit.transform.gameObject);
-            
-            currentHitDistance = hit.distance;
-            for (int i = 0; i < currentHitObjects.Count; i = i + 1) 
-            {
-                if (currentHitObjects[i].name.Contains("ProgressObject"))
-                {
-                    
-                   
-                    progressPosition = currentHitObjects[i].transform.position;
-                    if (progressPosition != null)
-                    {
-                        currentGoal = progressPosition;
-                    }
-                    
-                    isProgressing = true;
-                    currentHitObjects[i].SetActive(false);
-                    Debug.Log(isProgressing);
-                    
-                    
-                }
-                
-
-            }
+            if (b.pressed || pressed.Contains(b)) continue;
+            float d = Vector3.Distance(transform.position, b.transform.position);
+            if (d < bestDist) { bestDist = d; best = b; }
         }
-        
+
+        if (best == null)
+        {
+            Debug.LogWarning("[Companion] Buton bulunamadi (CompanionButton yok / yaricap kucuk / zaten basilmis)");
+            return;
+        }
+
+        GoPress(best);
     }
 
+    public void FindAndPress() { FindAndPress(searchRadius); }
 
-    private void OnDrawGizmos()
+    // Eski SearchTrigger scripti derlenmeye devam etsin diye birakildi
+    public void StartSearch(Bounds area) { FindAndPress(Mathf.Max(searchRadius, area.extents.magnitude)); }
+    public void StartSearch() { FindAndPress(searchRadius); }
+
+    void GoPress(CompanionButton btn)
     {
-        Gizmos.color = Color.red;
-        Debug.DrawLine(transform.position+new Vector3(0,1,0), transform.position + transform.forward * currentHitDistance);
-        Gizmos.DrawWireSphere((transform.position+ new Vector3(0, 1, 0)) + transform.forward * currentHitDistance, radiusOfSearch);
+        Vector3 p = btn.standPoint ? btn.standPoint.position : btn.transform.position;
+        if (NavMesh.SamplePosition(p, out NavMeshHit nav, 3f, NavMesh.AllAreas))
+            p = nav.position;
 
+        target = btn;
+        goal = p;
+        goTimer = goTimeout;
+        agent.stoppingDistance = 0.3f;
+        state = State.Go;
+        Debug.Log("[Companion] Butona gidiyor: " + btn.name);
     }
+
     void Update()
     {
-        float dist = Vector3.Distance(transform.position, player.position);
-        
-        agent.speed = dist > catchUpDistance ? runSpeed : walkSpeed;
+        if (useTestKey && Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+            FindAndPress(searchRadius);
 
-        if (isProgressing)
-        { 
-            
-                agent.SetDestination(currentGoal);
-            
-        }
-        else if (dist > followDistance)
+        switch (state)
         {
-            agent.SetDestination(player.position - new Vector3(1.25f, 0, 1.25f));
+            case State.Follow: FollowPlayer(); break;
+            case State.Go: GoStep(); break;
         }
-        else
-            agent.ResetPath();
 
         if (animator)
             animator.SetFloat("Speed", agent.velocity.magnitude);
+    }
+
+    void FollowPlayer()
+    {
+        if (!player) return;
+
+        float dist = Vector3.Distance(transform.position, player.position);
+        agent.speed = dist > catchUpDistance ? runSpeed : walkSpeed;
+
+        if (dist > followDistance)
+            agent.SetDestination(player.position - new Vector3(1.25f, 0, 1.25f));
+        else
+            agent.ResetPath();
+    }
+
+    void GoStep()
+    {
+        agent.speed = walkSpeed;
+        agent.SetDestination(goal);
+        goTimer -= Time.deltaTime;
+
+        Vector3 d = goal - transform.position;
+        d.y = 0f;
+        bool arrived = d.magnitude < 0.8f ||
+                       (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.1f);
+
+        if (arrived || goTimer <= 0f)
+        {
+            if (arrived && target)
+            {
+                pressed.Add(target);
+                target.Press();
+            }
+            else
+            {
+                Debug.LogWarning("[Companion] Butona ulasilamadi (NavMesh / standPoint kontrol et)");
+            }
+
+            target = null;
+            agent.stoppingDistance = followDistance;
+            state = State.Follow;
+        }
     }
 }
