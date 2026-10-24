@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 
 // Ollama ile konusan bilmececi heykel.
@@ -30,6 +31,7 @@ public class NpcDialogue : MonoBehaviour
 
     [Header("Oyun olaylari")]
     [SerializeField] private UnityEvent onOpenDoor;     // Door.Open buraya baglanir
+    [SerializeField] private float closeDelayAfterOpen = 2.5f;
 
     [TextArea(10, 24)]
     [SerializeField] private string systemPrompt =
@@ -81,6 +83,7 @@ action: konuşma sürüyorsa 'none', kapıyı açmaya karar verdiysen 'open_door
     bool waiting;
     bool doorOpened;
     bool inRange;
+    bool panelOpen;
 
     void Start()
     {
@@ -89,10 +92,17 @@ action: konuşma sürüyorsa 'none', kapıyı açmaya karar verdiysen 'open_door
         if (inputField) inputField.onSubmit.AddListener(_ => Send());
     }
 
+    void Update()
+    {
+        // ESC ile konusmayi kapat
+        if (panelOpen && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            ClosePanel();
+    }
+
     // --- Yaklasinca konusma ac / uzaklasinca kapat ---
     void OnTriggerEnter(Collider other)
     {
-        if (!IsPlayer(other)) return;
+        if (!IsPlayer(other) || doorOpened) return;
         inRange = true;
         OpenPanel();
     }
@@ -109,6 +119,9 @@ action: konuşma sürüyorsa 'none', kapıyı açmaya karar verdiysen 'open_door
 
     void OpenPanel()
     {
+        if (panelOpen) return;
+        panelOpen = true;
+
         if (panel) panel.SetActive(true);
         if (playerMovement) playerMovement.enabled = false;
         Cursor.visible = true;
@@ -119,7 +132,7 @@ action: konuşma sürüyorsa 'none', kapıyı açmaya karar verdiysen 'open_door
         {
             Append("<i>Taş Bekçi'nin gözleri parlıyor...</i>");
             Append("<b>Taş Bekçi:</b> Ne kadar çok alırsan, o kadar çok geride bırakırsın. Nedir bu?");
-            // Modelin bilmeceyi bildigini bilmesi icin gecmise ekle
+            // Modelin bilmeceyi sorduğunu bilmesi için geçmişe ekle
             history.Add(new ChatMsg
             {
                 role = "assistant",
@@ -128,12 +141,20 @@ action: konuşma sürüyorsa 'none', kapıyı açmaya karar verdiysen 'open_door
         }
     }
 
+    // Paneli gizler, hareketi ve fare kilidini geri verir
     void ClosePanel()
     {
+        panelOpen = false;
         if (panel) panel.SetActive(false);
         if (playerMovement) playerMovement.enabled = true;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    IEnumerator CloseAfterDelay(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        ClosePanel();
     }
 
     // --- Mesaj gonder (InputField Enter veya buton On Click) ---
@@ -217,6 +238,7 @@ action: konuşma sürüyorsa 'none', kapıyı açmaya karar verdiysen 'open_door
             doorOpened = true;
             onOpenDoor.Invoke();
             Append("<color=#80ff80>*Kapı açıldı*</color>");
+            StartCoroutine(CloseAfterDelay(closeDelayAfterOpen));
         }
     }
 
@@ -230,7 +252,7 @@ action: konuşma sürüyorsa 'none', kapıyı açmaya karar verdiysen 'open_door
             thinkingText.gameObject.SetActive(value);
             if (value) StartCoroutine(AnimateThinking());
         }
-        if (!value && inputField && inRange && !doorOpened) inputField.ActivateInputField();
+        if (!value && inputField && panelOpen && !doorOpened) inputField.ActivateInputField();
     }
 
     IEnumerator AnimateThinking()
