@@ -21,7 +21,10 @@ public class CheckpointScript : MonoBehaviour
         if (other.gameObject.name == "CheckPoint")
         {
             GlobalValues.currentCheckPoint = other.GetComponent<BoxCollider>().transform.localPosition;
-        other.gameObject.SetActive(false);
+            if (other.gameObject.tag != "SeperateScript")
+            {
+                Destroy(other.gameObject);
+            }
         }
         
     }

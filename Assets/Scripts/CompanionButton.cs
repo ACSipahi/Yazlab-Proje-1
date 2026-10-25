@@ -12,5 +12,6 @@ public class CompanionButton : MonoBehaviour
         if (pressed) return;
         pressed = true;
         onPressed.Invoke();
+        gameObject.SetActive(false);
     }
 }
