@@ -140,7 +140,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (isCrouching)
         {
-            if(Physics.Raycast(transform.position, transform.up, distanceBetweenNormalSize + 1.42f, layerMask, QueryTriggerInteraction.Ignore)) 
+            if(Physics.Raycast(transform.position, transform.up, distanceBetweenNormalSize + 1.4f, layerMask, QueryTriggerInteraction.Ignore)) 
             {
                 isThereGroundAbove = true;
             }
