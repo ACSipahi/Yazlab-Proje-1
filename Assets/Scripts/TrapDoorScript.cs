@@ -4,25 +4,33 @@ using UnityEngine;
 
 public class TrapDoorScript : MonoBehaviour
 {
- 
-    [SerializeField] private GameObject door;
+    private bool playerHasEntered = false;
+    private float speed = 2f;
+    [SerializeField] private GameObject trapDark;
     private Vector3 openDoorPosition;
     private BoxCollider trapHitBox;
     void Start()
     {
-        openDoorPosition = door.transform.position;
+        openDoorPosition = transform.position;
     }
 
     private void OnTriggerEnter(Collider other)
     { 
             if (other.CompareTag("Player"))
             {
-                door.transform.position = Vector3.MoveTowards(openDoorPosition, openDoorPosition + new Vector3(0, -2.762f, 0), 2);
-                gameObject.SetActive(false);
+                playerHasEntered = true;
+                
             }
     }
-   }
-            
+    private void Update()
+    {if (playerHasEntered)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, openDoorPosition + Vector3.down * 3, speed*Time.deltaTime);
+            trapDark.SetActive(false);
+        }
+    }
+}
+  
             
             
             
