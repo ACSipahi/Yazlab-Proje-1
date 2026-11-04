@@ -13,11 +13,13 @@ public enum OffMeshLinkMoveMethod
 [RequireComponent(typeof(NavMeshAgent))]
 public class AgentLinkMover : MonoBehaviour
 {
+    private Animator animator;
     public OffMeshLinkMoveMethod m_Method = OffMeshLinkMoveMethod.Parabola;
     public AnimationCurve m_Curve = new AnimationCurve();
 
     IEnumerator Start()
     {
+        animator = GetComponentInChildren<Animator>();
         NavMeshAgent agent = GetComponent<NavMeshAgent>();
         agent.autoTraverseOffMeshLink = false;
         while (true)
@@ -49,6 +51,7 @@ public class AgentLinkMover : MonoBehaviour
 
     IEnumerator Parabola(NavMeshAgent agent, float height, float duration)
     {
+        animator.SetTrigger("Jump");
         OffMeshLinkData data = agent.currentOffMeshLinkData;
         Vector3 startPos = agent.transform.position;
         Vector3 endPos = data.endPos + Vector3.up * agent.baseOffset;

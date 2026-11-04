@@ -10,11 +10,12 @@ public class CompanionFollow : MonoBehaviour
 
     [Header("Takip")]
     [SerializeField] public Transform player;
-    [SerializeField] public float followDistance = 2.5f;
-    [SerializeField] public float catchUpDistance = 8f;
-    [SerializeField] public float walkSpeed = 3.5f;
-    [SerializeField] public float runSpeed = 6f;
-    [SerializeField] public Animator animator;
+    [SerializeField] public float followDistance = 3f;
+    [SerializeField] private float catchUpDistance = 7f;
+    [SerializeField] private float walkSpeed = 3.5f;
+    [SerializeField] private float runSpeed = 6f;
+    [SerializeField] private Animator animator;
+    [SerializeField] private CharacterController playerController;
 
     [Header("Buton arama")]
     [SerializeField] private float goTimeout = 15f;
@@ -30,6 +31,7 @@ public class CompanionFollow : MonoBehaviour
 
     void Awake()
     {
+        animator = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
         agent.stoppingDistance = followDistance;
     }
@@ -100,10 +102,16 @@ public class CompanionFollow : MonoBehaviour
         float dist = Vector3.Distance(transform.position, player.position);
         agent.speed = dist > catchUpDistance ? runSpeed : walkSpeed;
 
-        if (dist > followDistance)
-            agent.SetDestination(player.position - new Vector3(1.25f, 0, 1.25f));
+        if (dist > followDistance && playerController.isGrounded)
+        {
+            agent.SetDestination(player.position - new Vector3( 0.25f, 0f, 0.25f));
+            animator.SetBool("Running", true);
+        }
         else
+        {agent.velocity = Vector3.zero;
             agent.ResetPath();
+            animator.SetBool("Running", false);
+        }
     }
 
     void GoStep()
