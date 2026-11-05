@@ -31,15 +31,20 @@ public class CompanionFollow : MonoBehaviour
 
     void Awake()
     {
-        animator = GetComponentInChildren<Animator>();
+        if (!animator) animator = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
         agent.stoppingDistance = followDistance;
+
+        if (!playerController && player)
+            playerController = player.GetComponent<CharacterController>();
     }
 
-    // DoorZone buradan cagirir: en yakin basilmamis butonu bulur ve gider
+    // DoorZone buradan cagirir: en yakin basilmamis butonu bulur ve gider.
+    // Takip durumunda olmasa da calisir (onceki gorevi birakir).
     public void FindAndPress(float radius)
     {
-        if (state != State.Follow) return;
+        if (!enabled) enabled = true;
+        if (!EnsureOnNavMesh()) return;
 
         CompanionButton best = null;
         float bestDist = radius;
@@ -53,7 +58,7 @@ public class CompanionFollow : MonoBehaviour
 
         if (best == null)
         {
-            Debug.LogWarning("[Companion] Buton bulunamadi (CompanionButton yok / yaricap kucuk / zaten basilmis)");
+            Debug.LogWarning("[Companion] Buton bulunamadi (CompanionButton yok / hepsi basilmis / yaricap kucuk)");
             return;
         }
 
@@ -66,12 +71,34 @@ public class CompanionFollow : MonoBehaviour
     public void StartSearch(Bounds area) { FindAndPress(Mathf.Max(searchRadius, area.extents.magnitude)); }
     public void StartSearch() { FindAndPress(searchRadius); }
 
+    // NavMesh'te degilse en yakin NavMesh noktasina isinlar (sessiz)
+    bool TryPlaceOnNavMesh()
+    {
+        if (agent.isOnNavMesh) return true;
+
+        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 5f, NavMesh.AllAreas))
+        {
+            agent.Warp(hit.position);
+            return agent.isOnNavMesh;
+        }
+        return false;
+    }
+
+    bool EnsureOnNavMesh()
+    {
+        if (TryPlaceOnNavMesh()) return true;
+
+        Debug.LogWarning("[Companion] NavMesh'te degil ve yakinda NavMesh yok. Companion'i mavi alana tasi / yeniden bake et ve sahneyi kaydet");
+        return false;
+    }
+
     void GoPress(CompanionButton btn)
     {
         Vector3 p = btn.standPoint ? btn.standPoint.position : btn.transform.position;
         if (NavMesh.SamplePosition(p, out NavMeshHit nav, 3f, NavMesh.AllAreas))
             p = nav.position;
 
+        agent.ResetPath();            // varsa onceki hedefi birak
         target = btn;
         goal = p;
         goTimer = goTimeout;
@@ -84,6 +111,9 @@ public class CompanionFollow : MonoBehaviour
     {
         if (useTestKey && Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
             FindAndPress(searchRadius);
+
+        // NavMesh'te degilse agent komutlari hata verir, once yerlestirmeyi dene
+        if (!TryPlaceOnNavMesh()) return;
 
         switch (state)
         {
@@ -102,15 +132,18 @@ public class CompanionFollow : MonoBehaviour
         float dist = Vector3.Distance(transform.position, player.position);
         agent.speed = dist > catchUpDistance ? runSpeed : walkSpeed;
 
-        if (dist > followDistance && playerController.isGrounded)
+        bool playerGrounded = !playerController || playerController.isGrounded;
+
+        if (dist > followDistance && playerGrounded)
         {
-            agent.SetDestination(player.position - new Vector3( 0.25f, 0f, 0.25f));
-            animator.SetBool("Running", true);
+            agent.SetDestination(player.position - new Vector3(0.25f, 0f, 0.25f));
+            if (animator) animator.SetBool("Running", true);
         }
         else
-        {agent.velocity = Vector3.zero;
+        {
+            agent.velocity = Vector3.zero;
             agent.ResetPath();
-            animator.SetBool("Running", false);
+            if (animator) animator.SetBool("Running", false);
         }
     }
 
@@ -118,6 +151,7 @@ public class CompanionFollow : MonoBehaviour
     {
         agent.speed = walkSpeed;
         agent.SetDestination(goal);
+        if (animator) animator.SetBool("Running", true);
         goTimer -= Time.deltaTime;
 
         Vector3 d = goal - transform.position;
