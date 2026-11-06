@@ -2,7 +2,7 @@
  # Taş Bekçi: Otonom Yoldaş ve LLM Destekli NPC
 
 **Ekip üyeleri:**
-- Aziz Soyad, Öğrenci No: 241307090
+- Aziz Öztürk, Öğrenci No: 241307090
 - Ahmet Can Sipahi Öğrenci No: 241307019
 
 **Tarih:** 6 Kasım 2026
